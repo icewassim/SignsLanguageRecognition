@@ -1,0 +1,66 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2013-03-16T15:44:57
+#
+#-------------------------------------------------
+
+QT       += core gui
+
+TARGET = untitled
+TEMPLATE = app
+
+
+SOURCES += main.cpp\
+        mainwindow.cpp
+
+HEADERS  += mainwindow.h
+
+FORMS    += mainwindow.ui
+
+
+unix:!macx:!symbian: LIBS += -L$$PWD/../../Desktop/codeblocks/elwass/lib/ -lopencv_calib3d
+
+INCLUDEPATH += $$PWD/../../../../usr/include/opencv
+DEPENDPATH += $$PWD/../../../../usr/include/opencv
+
+unix:!macx:!symbian: LIBS += -L$$PWD/../../Desktop/codeblocks/elwass/lib/ -lopencv_imgproc
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/release/ -lopencv_core
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/debug/ -lopencv_core
+else:symbian: LIBS += -lopencv_core
+else:unix: LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/ -lopencv_core
+
+INCLUDEPATH += $$PWD/../Desktop/codeblocks/elwass
+DEPENDPATH += $$PWD/../Desktop/codeblocks/elwass
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/release/opencv_core.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/debug/opencv_core.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/libopencv_core.a
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/release/ -lopencv_highgui
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/debug/ -lopencv_highgui
+else:symbian: LIBS += -lopencv_highgui
+else:unix: LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/ -lopencv_highgui
+
+INCLUDEPATH += $$PWD/../Desktop/codeblocks/elwass
+DEPENDPATH += $$PWD/../Desktop/codeblocks/elwass
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/release/opencv_highgui.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/debug/opencv_highgui.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/libopencv_highgui.a
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/release/ -lopencv_features2d
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/debug/ -lopencv_features2d
+else:symbian: LIBS += -lopencv_features2d
+else:unix: LIBS += -L$$PWD/../Desktop/codeblocks/elwass/lib/ -lopencv_features2d
+
+INCLUDEPATH += $$PWD/../Desktop/codeblocks/elwass
+DEPENDPATH += $$PWD/../Desktop/codeblocks/elwass
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/release/opencv_features2d.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/debug/opencv_features2d.lib
+else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../Desktop/codeblocks/elwass/lib/libopencv_features2d.a
+
