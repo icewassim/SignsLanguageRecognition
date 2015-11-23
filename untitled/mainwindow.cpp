@@ -23,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     timer1=new QTimer(this);
     connect(timer1,SIGNAL(timeout()),this,SLOT(stopped_timer()));
     ui->setupUi(this);
-
-
 }
 
 //fonction de capture
@@ -40,10 +38,7 @@ void MainWindow::Capture(){
     while(1){
         p_imgOriginal = cvQueryFrame(p_capWebcam);
         p_gray= cvCreateImage( cvGetSize(p_imgOriginal), 8, 1 );
-
         cvFlip(p_imgOriginal,p_imgOriginal,1);
-
-        //MainWindow::detecter_pos_main(p_imgOriginal);
         cvCvtColor(p_imgOriginal,p_gray,CV_BGR2GRAY);
         cvSetImageROI(p_gray,cvRect(100,100,200,200));
         cvThreshold(p_gray,p_gray,100,255, CV_THRESH_BINARY_INV);
@@ -54,45 +49,35 @@ void MainWindow::Capture(){
             cvNamedWindow("template gray", CV_WINDOW_AUTOSIZE);
             cvShowImage("template gray",p_gray);
          }
+         
         cvShowImage("Original", p_imgOriginal);
-
-
         for(int i=0;i<6;i++){
-        //IplImage* image1=cvLoadImage(alphabetTable[i], CV_LOAD_IMAGE_GRAYSCALE );
-        //ui->signname->setText(QString(alphabetTable[i]));
 
-        if(startmatching==true) matchresult=MainWindow::match_two_shapes(tableauxImage[i],p_gray);
+            if(startmatching==true) matchresult=MainWindow::match_two_shapes(tableauxImage[i],p_gray);
 
-        if(matchresult<0.1){
-            ui->signname->setText(QString(convertstring(alphabetTable[i])[0])); //good match
-            //timer1->stop();
-            timer1->start(1000);
+            if(matchresult<0.1){
+                ui->signname->setText(QString(convertstring(alphabetTable[i])[0])); //good match
+                timer1->start(1000);
                 }
-        else if (matchresult<0.25) couleur=cvScalar(0x00,0xff,0x00);
-        else couleur=cvScalar(0x00,0x00,0xff);
-
-
-        //else if(matchresult >0.7) ui->signname->setText(QString("Nothing !"));
-
+                
+        else 
+            if (matchresult<0.25) couleur=cvScalar(0x00,0xff,0x00);
+        else
+            couleur=cvScalar(0x00,0x00,0xff);
         ui->matchresultlabel->setText(QString::number(matchresult));
-
         }
 
-
-        //cvReleaseImage(&p_gray);
-        //cvReleaseImage(&p_imgOriginal);
         charCheckForEscKey = cvWaitKey(ui->Delais->value());// delay (in ms), and get key press, if any
         if((charCheckForEscKey == 27)||(stopCapture)) break;
-
-
     }
 
 
     for(int i=0;i<6;i++)
+    {
         cvReleaseImage(&tableauxImage[i]);
-
-          cvReleaseCapture(&p_capWebcam);
-          cvDestroyAllWindows();
+    }
+    cvReleaseCapture(&p_capWebcam);
+    cvDestroyAllWindows();
 }
 
 MainWindow::~MainWindow()
@@ -104,9 +89,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked() //boutton de capture webcam pressé
 {
-
     stopCapture=!stopCapture;
-
     if(stopCapture) {
         ui->pushButton->setText(QString("Start Capture"));
         ui->pushButton_2->setEnabled(false);
@@ -126,16 +109,12 @@ void MainWindow::on_pushButton_clicked() //boutton de capture webcam pressé
 
 }
 
-
-
-
 void MainWindow::on_pushButton_2_clicked() //boutton enregistrer Frame
 {
     String nom_image=ui->imageboxname->text().toStdString();
     cvSaveImage("template2.jpg",p_gray);//MainWindow::convertstring(nom_image),p_gray);
     ui->imageboxname->setText("");
 }
-
 
 void MainWindow::on_template_buttom_clicked()
 {
@@ -144,114 +123,79 @@ void MainWindow::on_template_buttom_clicked()
 
 void MainWindow::on_Findcontourbuttom_clicked()
 {
-
+   //TODO FindCountour button
 }
 
 void MainWindow::on_compareButtom_clicked()
 {
     startmatching=true;
 }
+
 //fonction de comparaison de deux contours
 float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 {
     double matchresult=100;
     double mincontour=200;  //taille mimale du contour qu il faut le detecter
     int CVCONTOUR_APPROX_LEVEL;
-
-
     IplImage* img1_edge = cvCreateImage( cvGetSize(image1), 8, 1 );
-//    IplImage* img1_8uc3 = cvCreateImage( cvGetSize(image1), 8, 3 );
-
     IplImage* img2_edge = cvCreateImage( cvGetSize(image2), 8, 1 );
-//    IplImage* img2_8uc3 = cvCreateImage( cvGetSize(image2), 8, 3 );
 
 
-       cvThreshold( image1, img1_edge, 128, 255, CV_THRESH_BINARY);
-       cvThreshold( image2, img2_edge, 128, 255, CV_THRESH_BINARY);
+    cvThreshold( image1, img1_edge, 128, 255, CV_THRESH_BINARY);
+    cvThreshold( image2, img2_edge, 128, 255, CV_THRESH_BINARY);
+    
+    CvMemStorage* storage = cvCreateMemStorage();
+    CvMemStorage *storage2=cvCreateMemStorage();
 
 
+    CvSeq* premier_contour_img1=NULL;
+    CvSeq* premier_contour_img2=NULL;
 
-       CvMemStorage* storage = cvCreateMemStorage();
-       CvMemStorage *storage2=cvCreateMemStorage();
+    CvSeq *newseq=NULL;
+    CvSeq *newseq2=NULL;
 
-
-       CvSeq* premier_contour_img1=NULL;
-       CvSeq* premier_contour_img2=NULL;
-
-
-       CvSeq *newseq=NULL;
-       CvSeq *newseq2=NULL;
-
-       // on extracte le premier contour
-       cvFindContours(
+   // on extracte le premier contour
+    cvFindContours(
        img1_edge,
        storage,
        &premier_contour_img1,
        sizeof(CvContour),
        CV_RETR_LIST
-       );
+    );
 
-       //on extracte le second contour
-       cvFindContours(
+    //on extracte le second contour
+    cvFindContours(
        img2_edge,
        storage2,
        &premier_contour_img2,
        sizeof(CvContour),
        CV_RETR_LIST
-       );
-
-        CVCONTOUR_APPROX_LEVEL=ui->tolerance_lvl->value();
-       //on fait l aproximation Poly anvant de comparer lé deux contours
-       for( CvSeq* c=premier_contour_img1; c!=NULL; c=c->h_next ) {
-           if(cvContourPerimeter(c)>mincontour){
-               newseq= cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
-
-               /*
-               nbrecont++;
-               cvCvtColor( image1, img1_8uc3, CV_GRAY2BGR );
-               cvDrawContours(img1_8uc3,newseq,CV_RGB(0,255,0),CV_RGB(255,0,0),0,2,8);
-               cvShowImage("hand.jpeg", img1_8uc3 );
-               ui->nombrecont->setText(QString::number(nbrecont));
-            */
-            }
-
-       }
-
-       for( CvSeq* c=premier_contour_img2; c!=NULL; c=c->h_next ) {
-           if(cvContourPerimeter(c)>mincontour){
-               newseq2= cvApproxPoly(c,sizeof(CvContour),storage2,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
-               /*
-               nbrecont++;
-               cvCvtColor( image2, img2_8uc3, CV_GRAY2BGR );
-               cvDrawContours(img2_8uc3,newseq2,CV_RGB(0,0,255),CV_RGB(0,255,255),0,2,8);
-               cvShowImage("hand2.jpeg", img2_8uc3 );
-               ui->nombrecont->setText(QString::number(nbrecont));
-            */
-            }
-
+    );
+    
+    CVCONTOUR_APPROX_LEVEL=ui->tolerance_lvl->value();
+    //on fait l aproximation Poly anvant de comparer lé deux contours
+    for( CvSeq* c=premier_contour_img1; c!=NULL; c=c->h_next ) {
+       if(cvContourPerimeter(c)>mincontour){
+           newseq= cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
         }
 
+    }
 
-       //on compare les deux contours
-       if(newseq&&newseq2)
-                matchresult=cvMatchContours(newseq2,newseq,1,2);
-
-       //       cvDestroyWindow("hand2.jpeg");
-       //       cvDestroyWindow("hand.jpeg");
-  //            cvReleaseImage( &image1 );
-  //            cvReleaseImage( &img1_8uc3 );
-              cvReleaseImage( &img1_edge );
-
-  //            cvReleaseImage( &image2 );
-              cvReleaseImage( &img2_edge );
-  //            cvReleaseImage( &img2_8uc3 );
-
-              cvReleaseMemStorage(&storage);
-              cvReleaseMemStorage(&storage2);
-
-       return matchresult;
+    for( CvSeq* c=premier_contour_img2; c!=NULL; c=c->h_next ) {
+       if(cvContourPerimeter(c)>mincontour){
+           newseq2= cvApproxPoly(c,sizeof(CvContour),storage2,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
+        }
+    }
 
 
+    //on compare les deux contours
+    if(newseq&&newseq2)
+        matchresult=cvMatchContours(newseq2,newseq,1,2);
+        cvReleaseImage( &img1_edge );
+        cvReleaseImage( &img2_edge );
+        cvReleaseMemStorage(&storage);
+        cvReleaseMemStorage(&storage2);
+        return matchresult;
 }
 
 
