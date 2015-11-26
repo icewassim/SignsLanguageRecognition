@@ -57,14 +57,13 @@ void MainWindow::Capture(){
                     timer1->start(1000);
                 }
                 
-        else 
-            {
-                if (matchresult<0.25) 
-                    couleur=cvScalar(0x00,0xff,0x00);
-                else
-                    couleur=cvScalar(0x00,0x00,0xff);
+            else {
+               if (matchresult<0.25) 
+                 couleur=cvScalar(0x00,0xff,0x00);
+               else
+                 couleur=cvScalar(0x00,0x00,0xff);
             }
-        ui->matchresultlabel->setText(QString::number(matchresult));
+            ui->matchresultlabel->setText(QString::number(matchresult));
         }
         charCheckForEscKey = cvWaitKey(ui->Delais->value());// delay (in ms), and get key press, if any
         if((charCheckForEscKey == 27)||(stopCapture)) 
