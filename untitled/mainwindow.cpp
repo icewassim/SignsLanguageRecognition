@@ -1,12 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
-
 using namespace cv;
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
    // tableau qui contien le chemin vers les alphabets
     stopCapture=true;
@@ -18,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     alphabetTable[5]="F.jpg";
     couleur=cvScalar(0x00,0x00,0xff);
     showGray=false;
-
     startmatching=false;
     timer1=new QTimer(this);
     connect(timer1,SIGNAL(timeout()),this,SLOT(stopped_timer()));
@@ -27,13 +22,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //fonction de capture
 void MainWindow::Capture(){
-
     float matchresult=1;
     p_capWebcam = cvCaptureFromCAM(0);
     cvNamedWindow("Original", CV_WINDOW_AUTOSIZE);
     IplImage * tableauxImage[6];
+    
     for(int i=0;i<6;i++)
-        tableauxImage[i]=cvLoadImage(alphabetTable[i], CV_LOAD_IMAGE_GRAYSCALE );
+        {
+            tableauxImage[i]=cvLoadImage(alphabetTable[i], CV_LOAD_IMAGE_GRAYSCALE );
+        }
 
     while(1){
         p_imgOriginal = cvQueryFrame(p_capWebcam);
@@ -52,27 +49,29 @@ void MainWindow::Capture(){
          
         cvShowImage("Original", p_imgOriginal);
         for(int i=0;i<6;i++){
-
-            if(startmatching==true) matchresult=MainWindow::match_two_shapes(tableauxImage[i],p_gray);
-
+            if(startmatching==true) 
+                matchresult=MainWindow::match_two_shapes(tableauxImage[i],p_gray);
+                
             if(matchresult<0.1){
-                ui->signname->setText(QString(convertstring(alphabetTable[i])[0])); //good match
-                timer1->start(1000);
+                    ui->signname->setText(QString(convertstring(alphabetTable[i])[0])); //good match
+                    timer1->start(1000);
                 }
                 
         else 
-            if (matchresult<0.25) couleur=cvScalar(0x00,0xff,0x00);
-        else
-            couleur=cvScalar(0x00,0x00,0xff);
+            {
+                if (matchresult<0.25) 
+                    couleur=cvScalar(0x00,0xff,0x00);
+                else
+                    couleur=cvScalar(0x00,0x00,0xff);
+            }
         ui->matchresultlabel->setText(QString::number(matchresult));
         }
-
         charCheckForEscKey = cvWaitKey(ui->Delais->value());// delay (in ms), and get key press, if any
-        if((charCheckForEscKey == 27)||(stopCapture)) break;
+        if((charCheckForEscKey == 27)||(stopCapture)) 
+            break;
     }
-
-
-    for(int i=0;i<6;i++)
+    
+    for(int i = 0;i < 6;i++)
     {
         cvReleaseImage(&tableauxImage[i]);
     }
@@ -111,7 +110,7 @@ void MainWindow::on_pushButton_clicked() //boutton de capture webcam pressé
 
 void MainWindow::on_pushButton_2_clicked() //boutton enregistrer Frame
 {
-    String nom_image=ui->imageboxname->text().toStdString();
+    String nom_image = ui->imageboxname->text().toStdString();
     cvSaveImage("template2.jpg",p_gray);//MainWindow::convertstring(nom_image),p_gray);
     ui->imageboxname->setText("");
 }
@@ -139,18 +138,12 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
     int CVCONTOUR_APPROX_LEVEL;
     IplImage* img1_edge = cvCreateImage( cvGetSize(image1), 8, 1 );
     IplImage* img2_edge = cvCreateImage( cvGetSize(image2), 8, 1 );
-
-
     cvThreshold( image1, img1_edge, 128, 255, CV_THRESH_BINARY);
     cvThreshold( image2, img2_edge, 128, 255, CV_THRESH_BINARY);
-    
     CvMemStorage* storage = cvCreateMemStorage();
-    CvMemStorage *storage2=cvCreateMemStorage();
-
-
+    CvMemStorage *storage2 = cvCreateMemStorage();
     CvSeq* premier_contour_img1=NULL;
     CvSeq* premier_contour_img2=NULL;
-
     CvSeq *newseq=NULL;
     CvSeq *newseq2=NULL;
 
@@ -174,35 +167,36 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
     
     CVCONTOUR_APPROX_LEVEL=ui->tolerance_lvl->value();
     //on fait l aproximation Poly anvant de comparer lé deux contours
-    for( CvSeq* c=premier_contour_img1; c!=NULL; c=c->h_next ) {
+    for( CvSeq* c = premier_contour_img1; c != NULL;c = c->h_next) {
        if(cvContourPerimeter(c)>mincontour){
-           newseq= cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
+           newseq = cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
         }
 
     }
 
-    for( CvSeq* c=premier_contour_img2; c!=NULL; c=c->h_next ) {
-       if(cvContourPerimeter(c)>mincontour){
-           newseq2= cvApproxPoly(c,sizeof(CvContour),storage2,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
+    for(CvSeq* c = premier_contour_img2; c != NULL;c = c->h_next) {
+       if(cvContourPerimeter(c) > mincontour){
+           newseq2 = cvApproxPoly(c,sizeof(CvContour),storage2,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
         }
     }
 
 
     //on compare les deux contours
-    if(newseq&&newseq2)
-        matchresult=cvMatchContours(newseq2,newseq,1,2);
-        cvReleaseImage( &img1_edge );
-        cvReleaseImage( &img2_edge );
-        cvReleaseMemStorage(&storage);
-        cvReleaseMemStorage(&storage2);
-        return matchresult;
+    if(newseq && newseq2)
+        matchresult = cvMatchContours(newseq2,newseq,1,2);
+    
+    cvReleaseImage(&img1_edge);
+    cvReleaseImage(&img2_edge);
+    cvReleaseMemStorage(&storage);
+    cvReleaseMemStorage(&storage2);
+    return matchresult;
 }
 
 
 //fonction de convertion string en char *
 char * MainWindow::convertstring(std::string s){
-        int x=s.size();
-        char * ch=new char[x+1];
+        int x = s.size();
+        char * ch = new char[x+1];
         ch[x+1]=0;
         memcpy(ch,s.c_str(),x);
 
@@ -211,53 +205,37 @@ char * MainWindow::convertstring(std::string s){
 //skin detector -not reeady yet-
 CvRect MainWindow::detecter_pos_main(IplImage * src_image)
 {
-    IplImage * dest_image=cvCreateImage(cvGetSize(src_image), 8, 1);
-    IplImage * HSV_image=cvCreateImage( cvGetSize(src_image), 8, 3);
+    IplImage * dest_image = cvCreateImage(cvGetSize(src_image), 8, 1);
+    IplImage * HSV_image = cvCreateImage( cvGetSize(src_image), 8, 3);
     CvMemStorage* storage = cvCreateMemStorage();
-    CvSeq* premier_contour_img1=NULL;
-
-    CvSeq *newseq=NULL;
-
-
-
-
+    CvSeq* premier_contour_img1 = NULL;
+    CvSeq *newseq = NULL;
     cvCvtColor(src_image,HSV_image, CV_RGB2HSV );
-
     cvInRangeS(HSV_image, cvScalar(ui->minH->value(),ui->minS->value(),ui->minV->value()), cvScalar(ui->maxH->value(),ui->maxS->value(),ui->maxV->value()),dest_image);
-
-
     cvSmooth(dest_image,dest_image,CV_MEDIAN,ui->smoothlvl->value());
     cvDilate(dest_image,dest_image,NULL,ui->kernelsize->value());
     cvErode(dest_image,dest_image,NULL,ui->kernelsize->value());
 
-
     // on extracte le premier contour
     cvFindContours(
-    dest_image,
-    storage,
-    &premier_contour_img1,
-    sizeof(CvContour),
-    CV_RETR_LIST
+        dest_image,
+        storage,
+        &premier_contour_img1,
+        sizeof(CvContour),
+        CV_RETR_LIST
     );
 
     int x,y;
     //on fait l aproximation Poly anvant de comparer les deux contours
-    for( CvSeq* c=premier_contour_img1; c!=NULL; c=c->h_next ) {
-        if(cvContourPerimeter(c)>150){
-            newseq= cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,5,0); //pprox
-            x=cvBoundingRect(c).x;
-            y=cvBoundingRect(c).y;
+    for(CvSeq* c = premier_contour_img1;c != NULL;c = c->h_next) {
+        if(cvContourPerimeter(c) > 150){
+            newseq = cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,5,0); //pprox
+            x = cvBoundingRect(c).x;
+            y = cvBoundingRect(c).y;
             if((x!=0)&&(y!=0)&&(y!=src_image->height)&&(x!=src_image->width))
-            MainWindow::draw_box(src_image,cvBoundingRect(c));
+                MainWindow::draw_box(src_image,cvBoundingRect(c));
          }
-
     }
-
- //   cvNamedWindow("HSV", CV_WINDOW_AUTOSIZE);
- //   cvShowImage("HSV",dest_image);
-
-
-
    cvReleaseImage(&HSV_image);
    cvReleaseImage(&dest_image);
 }
@@ -265,13 +243,13 @@ CvRect MainWindow::detecter_pos_main(IplImage * src_image)
 //fonction pour dessiner un rectangle bleu(Region Of Interest)
 void MainWindow::draw_box( IplImage* img, CvRect box ) {
 cvRectangle (
-img,
-cvPoint(box.x,box.y),
-cvPoint(box.x+box.width,box.y+box.height),
-couleur
-/* couleur de rectangle */
-);
+        img,
+        cvPoint(box.x,box.y),
+        cvPoint(box.x+box.width,box.y+box.height),
+        couleur /* couleur de rectangle */
+    );
 }
+
 void MainWindow::stopped_timer()
 {
     ui->signname->setText("");
