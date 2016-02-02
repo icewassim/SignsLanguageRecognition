@@ -4,7 +4,7 @@
 using namespace cv;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-   // tableau qui contien le chemin vers les alphabets
+   // Array of the pattern alphabets 
     stopCapture=true;
     alphabetTable[0]="A.jpg";
     alphabetTable[1]="B.jpg";
@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 }
 
-//fonction de capture
+//Start capture function 
 void MainWindow::Capture(){
     float matchresult=1;
     p_capWebcam = cvCaptureFromCAM(0);
@@ -41,7 +41,7 @@ void MainWindow::Capture(){
         cvThreshold(p_gray,p_gray,100,255, CV_THRESH_BINARY_INV);
         MainWindow::draw_box(p_imgOriginal,cvRect(100,100,200,200));
 
-        //si le bouton  show ROI est clické
+        // when show Roi Button is clicked
         if(showGray==true) {
             cvNamedWindow("template gray", CV_WINDOW_AUTOSIZE);
             cvShowImage("template gray",p_gray);
@@ -84,8 +84,8 @@ MainWindow::~MainWindow()
    delete ui;
 }
 
-
-void MainWindow::on_pushButton_clicked() //boutton de capture webcam pressé
+// start capture clicked
+void MainWindow::on_pushButton_clicked() 
 {
     stopCapture=!stopCapture;
     if(stopCapture) {
@@ -110,7 +110,7 @@ void MainWindow::on_pushButton_clicked() //boutton de capture webcam pressé
 void MainWindow::on_pushButton_2_clicked() //boutton enregistrer Frame
 {
     String nom_image = ui->imageboxname->text().toStdString();
-    cvSaveImage("template2.jpg",p_gray);//MainWindow::convertstring(nom_image),p_gray);
+    cvSaveImage("template2.jpg",p_gray);
     ui->imageboxname->setText("");
 }
 
@@ -129,7 +129,14 @@ void MainWindow::on_compareButtom_clicked()
     startmatching=true;
 }
 
-//fonction de comparaison de deux contours
+/**
+ * function to match two contours
+ * @param {IpImage} image1
+ * @param {IpImage} image12
+ * 
+*/
+
+
 float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 {
     double matchresult=100;
@@ -146,7 +153,7 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
     CvSeq *newseq=NULL;
     CvSeq *newseq2=NULL;
 
-   // on extracte le premier contour
+   //first Border extraction
     cvFindContours(
        img1_edge,
        storage,
@@ -155,7 +162,7 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
        CV_RETR_LIST
     );
 
-    //on extracte le second contour
+    //second border extraction
     cvFindContours(
        img2_edge,
        storage2,
@@ -165,7 +172,7 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
     );
     
     CVCONTOUR_APPROX_LEVEL=ui->tolerance_lvl->value();
-    //on fait l aproximation Poly anvant de comparer lé deux contours
+    //extract aprox polu
     for( CvSeq* c = premier_contour_img1; c != NULL;c = c->h_next) {
        if(cvContourPerimeter(c)>mincontour){
            newseq = cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,CVCONTOUR_APPROX_LEVEL,0); //pprox
@@ -180,7 +187,7 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
     }
 
 
-    //on compare les deux contours
+    //match the two contours
     if(newseq && newseq2)
         matchresult = cvMatchContours(newseq2,newseq,1,2);
     
@@ -192,7 +199,7 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 }
 
 
-//fonction de convertion string en char *
+
 char * MainWindow::convertstring(std::string s){
         int x = s.size();
         char * ch = new char[x+1];
@@ -201,7 +208,12 @@ char * MainWindow::convertstring(std::string s){
 
 }
 
-//skin detector -not reeady yet-
+/** 
+  * TODO Skin detector
+  * function to detect the skin position
+  * @param {IpImage} src_image
+  * @return {CvRect} hand rectangele position
+  */
 CvRect MainWindow::detecter_pos_main(IplImage * src_image)
 {
     IplImage * dest_image = cvCreateImage(cvGetSize(src_image), 8, 1);
@@ -215,7 +227,7 @@ CvRect MainWindow::detecter_pos_main(IplImage * src_image)
     cvDilate(dest_image,dest_image,NULL,ui->kernelsize->value());
     cvErode(dest_image,dest_image,NULL,ui->kernelsize->value());
 
-    // on extracte le premier contour
+    // extract le premier contour
     cvFindContours(
         dest_image,
         storage,
@@ -225,7 +237,7 @@ CvRect MainWindow::detecter_pos_main(IplImage * src_image)
     );
 
     int x,y;
-    //on fait l aproximation Poly anvant de comparer les deux contours
+    //aproximation Poly anvant de comparer les deux contours
     for(CvSeq* c = premier_contour_img1;c != NULL;c = c->h_next) {
         if(cvContourPerimeter(c) > 150){
             newseq = cvApproxPoly(c,sizeof(CvContour),storage,CV_POLY_APPROX_DP,5,0); //pprox
@@ -239,7 +251,11 @@ CvRect MainWindow::detecter_pos_main(IplImage * src_image)
    cvReleaseImage(&dest_image);
 }
 
-//fonction pour dessiner un rectangle bleu(Region Of Interest)
+/*
+ * function to draw a blue box
+ * @param {IpImage} input image
+ * @param {cvRect} blue box 
+ */
 void MainWindow::draw_box( IplImage* img, CvRect box ) {
 cvRectangle (
         img,
@@ -248,6 +264,7 @@ cvRectangle (
         couleur /* couleur de rectangle */
     );
 }
+
 
 void MainWindow::stopped_timer()
 {
