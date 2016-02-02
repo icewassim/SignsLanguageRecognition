@@ -130,13 +130,11 @@ void MainWindow::on_compareButtom_clicked()
 }
 
 /**
- * function to match two contours
+ * matching two contours extracted from two shapes
  * @param {IpImage} image1
  * @param {IpImage} image12
  * 
 */
-
-
 float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 {
     double matchresult=100;
@@ -210,7 +208,7 @@ char * MainWindow::convertstring(std::string s){
 
 /** 
   * TODO Skin detector
-  * function to detect the skin position
+  * Skin position Detector
   * @param {IpImage} src_image
   * @return {CvRect} hand rectangele position
   */
@@ -252,7 +250,7 @@ CvRect MainWindow::detecter_pos_main(IplImage * src_image)
 }
 
 /*
- * function to draw a blue box
+ * Draw a blue box 
  * @param {IpImage} input image
  * @param {cvRect} blue box 
  */
