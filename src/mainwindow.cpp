@@ -198,9 +198,9 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 
 
 
-char * MainWindow::convertstring(std::string s){
+char *MainWindow::convertstring(std::string s){
       int x = s.size();
-      char * ch = new char[x+1];
+      char *ch = new char[x+1];
       ch[x+1]=0;
       memcpy(ch,s.c_str(),x);
       return ch;
