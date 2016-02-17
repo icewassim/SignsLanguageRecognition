@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     alphabetTable[3]="D.jpg";
     alphabetTable[4]="E.jpg";
     alphabetTable[5]="F.jpg";
-    couleur=cvScalar(0x00,0x00,0xff);
+    couleur=cvScalaCvRect MainWindow::detecter_pos_main(IplImage * src_image)r(0x00,0x00,0xff);
     showGray=false;
     startmatching=false;
     timer1=new QTimer(this);
@@ -199,11 +199,11 @@ float MainWindow::match_two_shapes(IplImage* image1,IplImage * image2)
 
 
 char * MainWindow::convertstring(std::string s){
-        int x = s.size();
-        char * ch = new char[x+1];
-        ch[x+1]=0;
-        memcpy(ch,s.c_str(),x);
-
+      int x = s.size();
+      char * ch = new char[x+1];
+      ch[x+1]=0;
+      memcpy(ch,s.c_str(),x);
+      return ch;
 }
 
 /** 
@@ -212,7 +212,7 @@ char * MainWindow::convertstring(std::string s){
   * @param {IpImage} src_image
   * @return {CvRect} hand rectangele position
   */
-CvRect MainWindow::detecter_pos_main(IplImage * src_image)
+void MainWindow::detecter_pos_main(IplImage * src_image)
 {
     IplImage * dest_image = cvCreateImage(cvGetSize(src_image), 8, 1);
     IplImage * HSV_image = cvCreateImage( cvGetSize(src_image), 8, 3);
