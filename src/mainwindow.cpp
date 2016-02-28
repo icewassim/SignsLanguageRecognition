@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     alphabetTable[3]="D.jpg";
     alphabetTable[4]="E.jpg";
     alphabetTable[5]="F.jpg";
-    couleur=cvScalaCvRect MainWindow::detecter_pos_main(IplImage * src_image)r(0x00,0x00,0xff);
+    couleur=cvScalar(0x00,0x00,0xff);
     showGray=false;
     startmatching=false;
     timer1=new QTimer(this);
